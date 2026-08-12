@@ -85,21 +85,45 @@ local function GetCurrentDelveGroup()
   return nil
 end
 
+-- Each season resumes where the previous one capped, so Min is the level the
+-- season starts from and Lvl is the level it ends at.
 local SEASON_MAXLEVEL = {
-  [1] = { Lvl = 60, Title = "Nullaeus Allies" },
-  [2] = { Lvl = 80, Title = "Nullaeus Allies" },
-  [3] = { Lvl = 100, Title = "Nullaeus Allies" },
+  [1] = { Min = 0, Lvl = 60, Title = "Nullaeus Allies" },
+  [2] = { Min = 60, Lvl = 80, Title = "Nullaeus Allies" },
+  [3] = { Min = 80, Lvl = 100, Title = "Nullaeus Allies" },
 }
 
-local function GetCurrentSeasonMaxLevel(parse)
+local LAST_KNOWN_SEASON = #SEASON_MAXLEVEL
+
+-- There is no Season 4, so an out-of-range or missing season number means the
+-- API failed rather than that new content shipped. Clamp into the known range
+-- and prefer the newest season when we have nothing at all: defaulting to
+-- Season 1 would report a cap below the player's real level, which hides the
+-- companion bar outright instead of just mis-colouring it.
+local function GetCurrentSeasonNumber()
   local currentSeason
   if C_DelvesUI and C_DelvesUI.GetCurrentDelvesSeasonNumber then
     currentSeason = tonumber(C_DelvesUI.GetCurrentDelvesSeasonNumber())
   end
 
-  local seasonData = SEASON_MAXLEVEL[currentSeason] or SEASON_MAXLEVEL[1]
+  if not currentSeason then
+    return LAST_KNOWN_SEASON
+  end
+  if currentSeason < 1 then
+    return 1
+  end
+  if currentSeason > LAST_KNOWN_SEASON then
+    return LAST_KNOWN_SEASON
+  end
+  return currentSeason
+end
+
+local function GetCurrentSeasonMaxLevel(parse)
+  local seasonData = SEASON_MAXLEVEL[GetCurrentSeasonNumber()]
   if parse == "Lvl" then
     return seasonData.Lvl
+  elseif parse == "Min" then
+    return seasonData.Min
   else
     return seasonData.Title
   end
@@ -108,6 +132,7 @@ end
 _G.PrintFriendshipBar = PrintFriendshipBar
 _G.GetCurrentDelveGroup = GetCurrentDelveGroup
 _G.GetCurrentSeasonMaxLevel = GetCurrentSeasonMaxLevel
+_G.GetCurrentDelvesSeason = GetCurrentSeasonNumber
 
 -- Shared utility helpers for DelveInformant modules.
 -- Keeping these in one place avoids duplicated helper logic in each feature file.

@@ -105,6 +105,33 @@ local function GetCurrentSeasonMaxLevel()
   return 0
 end
 
+local function GetCurrentSeasonMinLevel()
+  if _G.GetCurrentSeasonMaxLevel then
+    return _G.GetCurrentSeasonMaxLevel("Min")
+  end
+  return 0
+end
+
+-- Colour the level across the current season's band only: red at the level the
+-- season starts from, full green at its cap (S2 spans 60-80, S3 spans 80-100).
+-- Feeding a normalised 0-1 ratio through the (value, maximum) form keeps this
+-- identical whether LibCrayon or the local stand-in above is in play.
+local function GetSeasonLevelHexColor(level, minLevel, maxLevel)
+  minLevel = tonumber(minLevel) or 0
+  maxLevel = tonumber(maxLevel) or 0
+
+  local span = maxLevel - minLevel
+  if span <= 0 then
+    return Crayon:GetThresholdHexColor(level, maxLevel)
+  end
+
+  local pct = ((tonumber(level) or 0) - minLevel) / span
+  if pct < 0 then pct = 0 end
+  if pct > 1 then pct = 1 end
+
+  return Crayon:GetThresholdHexColor(pct, 1)
+end
+
 local function IsPlayerInCombat()
   return UnitAffectingCombat and UnitAffectingCombat("player")
 end
@@ -596,12 +623,11 @@ local function UpdateDisplay()
   local needed = companionInfo.totalXP
   local currentMaxLevel = tonumber(GetCurrentSeasonMaxLevel())
 
-  if currentMaxLevel and currentMaxLevel > 0 and level and level >= currentMaxLevel then
-    HideFrameWithFade()
-    return
-  end
-
-  local isCapped = needed <= 0
+  -- At the season cap there is no further XP to earn, so the bar stays up
+  -- reading a full green level rather than disappearing.
+  local atSeasonCap = not not (currentMaxLevel and currentMaxLevel > 0
+    and level and level >= currentMaxLevel)
+  local isCapped = needed <= 0 or atSeasonCap
   local pct = 1
 
   if isCapped then
@@ -620,7 +646,7 @@ local function UpdateDisplay()
   lastNeeded = needed
   lastIsCapped = isCapped
 
-  local HEX_LEVELVALUE = Crayon:GetThresholdHexColor(level, currentMaxLevel)
+  local HEX_LEVELVALUE = GetSeasonLevelHexColor(level, GetCurrentSeasonMinLevel(), currentMaxLevel)
 
   nameText:SetText(VALEERA_NAME)
   levelText:SetText(string.format("Level %s/%s", Crayon:Colorize(HEX_LEVELVALUE, level), Crayon:Green(currentMaxLevel)))
