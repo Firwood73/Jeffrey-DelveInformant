@@ -351,6 +351,17 @@ local function SetLayoutActive(active)
   end
 end
 
+-- Resetting to the empty 4-ally layout has to wait until the frame is actually
+-- gone. Doing it when the hide was *requested* meant every fade-out played on a
+-- wiped bar rather than on the state the player was looking at.
+local function FinishHide()
+  f:Hide()
+  SetLayoutActive(false)
+  if ResetToHiddenEmptyState then
+    ResetToHiddenEmptyState()
+  end
+end
+
 local function StartFadeTo(targetAlpha, duration, hideOnDone)
   targetAlpha = Clamp(targetAlpha or 0, 0, 1)
   duration = tonumber(duration) or 0
@@ -380,8 +391,7 @@ local function StartFadeTo(targetAlpha, duration, hideOnDone)
     f:SetAlpha(fadeTo)
     fadeActive = false
     if fadeHideOnDone and fadeTo <= 0 then
-      f:Hide()
-      SetLayoutActive(false)
+      FinishHide()
     end
   end
 end
@@ -398,15 +408,10 @@ end
 local function HideFrameWithFade()
   lastShownState = false
 
-  if ResetToHiddenEmptyState then
-    ResetToHiddenEmptyState()
-  end
-
   if not f:IsShown() and (f:GetAlpha() or 0) <= 0 then
     f:SetAlpha(0)
-    f:Hide()
     StopFade()
-    SetLayoutActive(false)
+    FinishHide()
     return
   end
 
@@ -983,8 +988,7 @@ f:SetScript("OnUpdate", function(self, dt)
       f:SetAlpha(fadeTo)
       fadeActive = false
       if fadeHideOnDone and fadeTo <= 0 then
-        f:Hide()
-        SetLayoutActive(false)
+        FinishHide()
       end
     else
       local t = fadeElapsed / fadeDuration
@@ -994,8 +998,7 @@ f:SetScript("OnUpdate", function(self, dt)
       if t >= 1 then
         fadeActive = false
         if fadeHideOnDone and fadeTo <= 0 then
-          f:Hide()
-          SetLayoutActive(false)
+          FinishHide()
         end
       end
     end
