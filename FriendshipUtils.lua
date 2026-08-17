@@ -88,9 +88,9 @@ end
 -- Each season resumes where the previous one capped, so Min is the level the
 -- season starts from and Lvl is the level it ends at.
 local SEASON_MAXLEVEL = {
-  [1] = { Min = 0, Lvl = 60, Title = "Nullaeus Allies" },
-  [2] = { Min = 60, Lvl = 80, Title = "Nullaeus Allies" },
-  [3] = { Min = 80, Lvl = 100, Title = "Nullaeus Allies" },
+  [1] = { Min = 0, Lvl = 60, Title = "Nemesis' Allies" },
+  [2] = { Min = 60, Lvl = 80, Title = "Nemesis' Allies" },
+  [3] = { Min = 80, Lvl = 100, Title = "Nemesis' Allies" },
 }
 
 local LAST_KNOWN_SEASON = #SEASON_MAXLEVEL

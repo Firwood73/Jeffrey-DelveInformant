@@ -2,7 +2,7 @@
 ## Title: DelveInformant by |cFF69CCF0Jeffrey|r
 ## Notes: Standalone tracker for Delve objectives
 ## Author: Jeffrey
-## Version: 1.0.4
+## Version: 1.0.5
 ## SavedVariables: DelveInformantDB
 ## OptionalDeps: LibSharedMedia-3.0
 
