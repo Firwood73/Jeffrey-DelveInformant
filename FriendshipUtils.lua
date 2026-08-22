@@ -66,6 +66,7 @@ local MIDNIGHT_DELVE_INSTANCE_IDS = {
   [2966] = true,
   [2979] = true,
   [3003] = true,
+  [3038] = true,
 }
 
 local function GetCurrentDelveGroup()
