@@ -69,6 +69,10 @@ local MIDNIGHT_DELVE_INSTANCE_IDS = {
   [3038] = true,
 }
 
+-- Delve group to assume for a delve map we do not have listed. Point this at
+-- the current expansion so freshly added maps work without a patch.
+local CURRENT_DELVE_GROUP = "midnight"
+
 local function GetCurrentDelveGroup()
   local _, instanceType, _, _, _, _, _, instanceID = GetInstanceInfo()
   if instanceType ~= "scenario" then
@@ -81,6 +85,15 @@ local function GetCurrentDelveGroup()
 
   if MIDNIGHT_DELVE_INSTANCE_IDS[instanceID] then
     return "midnight"
+  end
+
+  -- Unlisted map: claim it only when the game confirms a delve is actually
+  -- running, so ordinary scenarios still return nil. This keeps a new delve
+  -- working on day one instead of silently hiding the bars until its ID is
+  -- added by hand. The trade is that an unlisted *TWW* map would be treated as
+  -- current-expansion, which mis-themes rather than breaks.
+  if C_PartyInfo and C_PartyInfo.IsDelveInProgress and C_PartyInfo.IsDelveInProgress() then
+    return CURRENT_DELVE_GROUP
   end
 
   return nil
