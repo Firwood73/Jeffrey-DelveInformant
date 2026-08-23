@@ -487,8 +487,10 @@ UpdateDisplay = function()
     return
   end
 
+  -- Any delve feeds the current season's Journey, so this shows in TWW and
+  -- Midnight delves alike. A nil group means we are not in a delve at all.
   local delveGroup = _G.GetCurrentDelveGroup and _G.GetCurrentDelveGroup()
-  if delveGroup ~= "midnight" then
+  if not delveGroup then
     HideFrameWithFade()
     return
   end
