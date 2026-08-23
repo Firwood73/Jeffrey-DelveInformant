@@ -2,10 +2,11 @@
 ## Title: DelveInformant by |cFF69CCF0Jeffrey|r
 ## Notes: Standalone tracker for Delve objectives
 ## Author: Jeffrey
-## Version: 1.0.9
+## Version: 1.1.0
 ## SavedVariables: DelveInformantDB
 ## OptionalDeps: LibSharedMedia-3.0
 
 FriendshipUtils.lua
 NemesisStrongbox.lua
 ValeeraSanguinar.lua
+DelverJourney.lua
