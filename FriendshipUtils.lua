@@ -193,11 +193,11 @@ end
 
 _G.DelveInformantUtils = DelveInformantUtils
 
--- The segmented border art lives in the optional ChatChange addon. When it is
--- not installed the texture files resolve to nothing and the bars render with
--- no frame at all, so fall back to a Blizzard backdrop edge instead.
-local SEGMENTED_BORDER_ADDON = "ChatChange"
-local SEGMENTED_BORDER_TEXTURE_PATH = "Interface\\AddOns\\ChatChange\\Textures\\"
+-- The segmented border art lives in a separate optional addon. Probe every
+-- known name rather than trusting one hardcoded string: renaming that addon
+-- silently drops the borders, because the missing texture files resolve to
+-- nothing instead of erroring.
+local SEGMENTED_BORDER_ADDONS = { "Jeffrey-ChatChange", "ChatChange" }
 
 local function IsAddOnAvailable(name)
   local getAddOnInfo = (C_AddOns and C_AddOns.GetAddOnInfo) or _G.GetAddOnInfo
@@ -207,6 +207,18 @@ local function IsAddOnAvailable(name)
 
   local ok, addonName = pcall(getAddOnInfo, name)
   return ok and addonName ~= nil
+end
+
+-- Texture folder of the first border addon that is actually installed.
+local function FindSegmentedBorderTexturePath()
+  for i = 1, #SEGMENTED_BORDER_ADDONS do
+    local name = SEGMENTED_BORDER_ADDONS[i]
+    if IsAddOnAvailable(name) then
+      return "Interface\\AddOns\\" .. name .. "\\Textures\\"
+    end
+  end
+
+  return nil
 end
 
 local function CreateBackdropBorder(parentFrame, borderSize, borderAlpha, frameLevelOffset)
@@ -254,9 +266,8 @@ local function CreateSegmentedBorder(parentFrame, options)
   local drawLayer = options.drawLayer or "BORDER"
 
   if not texturePath then
-    if IsAddOnAvailable(SEGMENTED_BORDER_ADDON) then
-      texturePath = SEGMENTED_BORDER_TEXTURE_PATH
-    else
+    texturePath = FindSegmentedBorderTexturePath()
+    if not texturePath then
       return CreateBackdropBorder(parentFrame, borderSize, borderAlpha, frameLevelOffset)
     end
   end
